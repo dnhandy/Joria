@@ -1,0 +1,32 @@
+{
+  "originYear": -10000,
+  "hasYearZero": true,
+  "months": [
+    { "name": "Joral", "days": 88 },
+    { "name": "Arinal", "days": 88 },
+    { "name": "Lomaral", "days": 88 },
+    { "name": "Janul", "days": 88 },
+    { "name": "Tarsil", "days": 11 },
+    { "name": "Miirial", "days": 88 },
+    { "name": "Gymidial", "days": 88 },
+    { "name": "Mautal", "days": 88 },
+    { "name": "Catoral", "days": 88 },
+    { "name": "Heshal", "days": 11 },
+    { "name": "Besphetal", "days": 88 },
+    { "name": "Pulumbaral", "days": 88 },
+    { "name": "Eamodenal", "days": 88 },
+    { "name": "Tannethal", "days": 88 },
+    { "name": "Urianal", "days": 11 },
+    { "name": "Vaetaral", "days": 88 },
+    { "name": "Ishkal", "days": 88 },
+    { "name": "Onidal", "days": 88 },
+    { "name": "Serinal", "days": 88 },
+    { "name": "Closal", "days": 11 },
+    { "name": "Cator's Defiance", "days": 11, "leap": {
+      "days": -11,
+      "period": {
+        "every": 11
+      }
+    } }
+  ]
+}

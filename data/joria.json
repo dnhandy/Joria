@@ -1,0 +1,149 @@
+{
+  "offset": 16378984,
+  "color": "#F0FFF0",
+  "size": 50,
+  "name": "jor",
+  "children": [
+    {
+      "name": "Arin",
+      "size": 10,
+      "color": "#AAAAAA",
+      "orbit": 487.018,
+      "rotation": 487.018
+    },
+    {
+      "name": "Lomar",
+      "size": 15,
+      "color": "#FACC03",
+      "orbit": 1122.952,
+      "rotation": 2.1,
+      "rotationalIncline": 85,
+      "children": [
+        {
+          "name": "Janu",
+          "size": 3,
+          "color": "#dddddd",
+          "orbit": 21,
+          "rotation": 21,
+          "orbitalIncline": 85,
+          "rotationalIncline": 85
+        },
+        {
+          "name": "Tarsi",
+          "size": 2,
+          "color": "purple",
+          "orbit": 37,
+          "rotation": 0.8,
+          "orbitalIncline": 85,
+          "rotationalIncline": 85
+        }
+      ]
+    },
+    {
+      "name": "Miira",
+      "size": 20,
+      "color": "#0000CC",
+      "orbit": 1460,
+      "rotation": 1,
+      "children": [
+        {
+          "name": "Gymida",
+          "size": 4,
+          "color": "#AAAAAA",
+          "orbit": 3,
+          "rotation": 3
+        },
+        {
+          "name": "Maut",
+          "size": 3,
+          "color": "#CCCCCC",
+          "orbit": 7,
+          "rotation": 7
+        },
+        {
+          "name": "Cator",
+          "size": 7,
+          "color": "#0000FF",
+          "orbit": 11,
+          "rotation": 11
+        },
+        {
+          "name": "Hesh",
+          "size": 8,
+          "color": "#804020",
+          "orbit": 17,
+          "rotation": 2
+        },
+        {
+          "name": "Besphet",
+          "size": 5,
+          "color": "#888010",
+          "orbit": 23,
+          "rotation": 0.6
+        },
+        {
+          "name": "Pulumbar",
+          "size": 1,
+          "color": "#555555",
+          "orbit": 29,
+          "rotation": 0.12
+        },
+        {
+          "name": "Eamoden",
+          "size": 2,
+          "color": "#CCCCFF",
+          "orbit": 43,
+          "rotation": 1.3
+        }
+      ]
+    },
+    {
+      "name": "Tanneth",
+      "size": 30,
+      "color": "#CC9003",
+      "orbit": 2187.632,
+      "rotation": 4.6,
+      "children": [
+        {
+          "name": "Urian",
+          "size": 6,
+          "color": "#BB0000",
+          "orbit": 19,
+          "rotation": 19
+        },
+        {
+          "name": "Vaetar",
+          "size": 7,
+          "color": "#CCCCCC",
+          "orbit": 31,
+          "rotation": 31
+        },
+        {
+          "name": "Ishk",
+          "size": 4,
+          "color": "#DDDDDD",
+          "orbit": 41,
+          "rotation": 3.1
+        }
+      ]
+    },
+    {
+      "name": "Onid",
+      "size": 25,
+      "color": "purple",
+      "orbit": 7358.4,
+      "rotation": 7.2,
+      "eccentricity": 0.2,
+      "procession": 200000,
+      "children": [
+        {
+          "name": "Serin",
+          "size": 9,
+          "color": "#880000",
+          "orbit": 53,
+          "rotation": 2.3
+        }
+      ]
+    }
+  ]
+}

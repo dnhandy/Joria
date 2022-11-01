@@ -1,0 +1,57 @@
+<html>
+  <head>
+
+  </head>
+  <body style="background-color: black">
+    <div style="position:absolute; border: 1px solid white; color: white; background-color: rgba(255, 255, 255, 0.1); ">
+      <div>
+        <label for="date">Date: </label>
+      </div>
+      <div>
+        <input type="hidden" name="date" id="dateInput" value="0" />
+        <input type="text" placeholder="day" name="dayOfMonth" id="dayOfMonthInput" size="2" />
+        <select id="monthInput">
+          
+        </select>
+        <input type="text" placeholder="year" name="year" id="yearInput" size="2" />
+      </div> 
+      <div>        
+        <button id="updateButton">Update</button>
+      </div>      
+      <div>
+        <input name="showPath" type="checkbox" id="showPathInput" checked />
+        <label for="showPath">Display Orbital Paths</label>
+      </div>
+      <div>
+        <input name="showPath" type="checkbox" id="showRotationInput" checked />
+        <label for="showPath">Display 0-degrees longitude</label>
+      </div>
+      <div style="position: relative; height:25">
+        <button id="playButton" style="position: absolute">Play</button>
+        <button id="pauseButton" style="visibility:hidden; position: absolute">Pause</button>
+      </div>
+      <div>
+        <label for="playSpeed">Play Speed</label>
+        <input type = "radio" value="0.015625" name="playSpeed"/>
+        <input type = "radio" value="0.03125" name="playSpeed"/>
+        <input type = "radio" value="0.0625" name="playSpeed"/>
+        <input type = "radio" value="0.125" name="playSpeed"/>
+        <input type = "radio" value="0.25" name="playSpeed"/>
+        <input type = "radio" value="0.5" name="playSpeed"/>
+        <input type = "radio" value="1" name="playSpeed" checked/>
+        <input type = "radio" value="2" name="playSpeed" />
+        <input type = "radio" value="4" name="playSpeed" />
+        <input type = "radio" value="8" name="playSpeed" />
+        <input type = "radio" value="16" name="playSpeed" />
+        <input type = "radio" value="32" name="playSpeed" />
+        <input type = "radio" value="64" name="playSpeed" />
+      </div>
+    </div>
+    <div id="hud" style="position:absolute;right:50;width:200px;height:100px;">
+    </div>
+    <div style="width:100%;height:100%;overflow:auto">
+      <canvas id="solarSystemCanvas" style="background-color:black;"></canvas>
+    </div>  
+    <script src="js/index.js"  type="module"></script>
+  </body>
+</html>
