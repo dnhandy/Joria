@@ -8,7 +8,10 @@ export class OrbitalSystem {
     this.color = json.color;
     this.size = +json.size;
     this.orbit = +( json.orbit || 0 );
+    this._eccentricity = +( json.eccentricity || 0 );
+    this.procession =  +( json.procession || 0 );
     this.offset = +(json.offset || offset);
+    this.currentProcession = 0;
     this.rotationAngle = 0;
     if( this.orbit == 0 ){
       this.orbit = 100;
@@ -66,6 +69,61 @@ export class OrbitalSystem {
     return size;
   }
 
+  get eccentricity(){
+    return Math.min( this._eccentricity, 0.9999999999); // This avoids a divide-by-zero error
+  }
+
+  maxOrbitalDistance(){
+    var maxDistance = this.size;
+    var nextRadius = this.size;
+    for( var i = 0; i < this.children.length; i++ ) {
+      var child = this.children[i];
+      var orbit = this.getOrbit( child, child.offset + child.orbit / 2, nextRadius );
+      nextRadius = orbit.nextRadius;
+      maxDistance = Math.max( maxDistance, orbit.radius + child.maxOrbitalDistance() );
+    }
+    return maxDistance;
+  }
+
+  getOrbit( child, date, lastOrbit = 0 ){
+    var orbit = {};
+
+    var baseRadius = lastOrbit + ( child.treeSize() - 1 ) * child.size + this.size;
+
+    orbit.angle = 2 * Math.PI * ( (date - child.offset) % child.orbit ) / child.orbit;
+    if( orbit.angle < 0 ){
+      orbit.angle = ( orbit.angle + 2 * Math.PI );
+    }
+
+    child.currentProcession = child.procession == 0 ? 0 : 2 * Math.PI * ( ( date - child.offset ) % child.procession ) / child.procession;
+    orbit.procession = child.currentProcession;
+    orbit.majorAxis =  baseRadius / ( 1 - child.eccentricity );
+    orbit.minorAxis = Math.sqrt( Math.pow(orbit.majorAxis, 2) * (1 - Math.pow( child.eccentricity, 2 ) ) ) * Math.cos(child.orbitalIncline);
+    orbit.radius = orbit.majorAxis * orbit.minorAxis / Math.sqrt( Math.pow( orbit.majorAxis, 2 ) * Math.pow( Math.sin( orbit.angle ), 2 ) + Math.pow( orbit.minorAxis, 2 ) * Math.pow( Math.cos( orbit.angle ), 2 ) )
+
+    orbit.center = {
+      x: this.position.x - orbit.majorAxis * child.eccentricity * Math.cos( orbit.procession ),
+      y: this.position.y - orbit.majorAxis * child.eccentricity * Math.sin( orbit.procession )
+    };    
+
+    // Get the position without procession
+    var childX = orbit.center.x + orbit.majorAxis * Math.cos( orbit.angle );
+    var childY = orbit.center.y + orbit.minorAxis * Math.sin( orbit.angle );
+    orbit.radius = Math.sqrt( Math.pow( childX - orbit.center.x, 2 ) + Math.pow( childY - orbit.center.y, 2 ) );
+    var tmpAngle = Math.atan( (childY - orbit.center.y) / (childX - orbit.center.x));
+    if( childX < orbit.center.x ){
+      tmpAngle = tmpAngle + Math.PI;
+    }
+    
+    // Now, add the procession in
+    orbit.position = {
+      x: orbit.center.x + orbit.radius * Math.cos( tmpAngle - orbit.procession ),
+      y: orbit.center.y + orbit.radius * Math.sin( tmpAngle - orbit.procession )
+    }
+
+    orbit.nextRadius = baseRadius + (child.treeSize() - 1) * child.size + this.size * Math.min(child.treeSize() - 1, 1);
+    return orbit;
+  }
 
   redraw( date ) {
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -76,15 +134,16 @@ export class OrbitalSystem {
     var orbitRadius = this.size;
     for( var i = 0; i < this.children.length; i++ ) {
       var child = this.children[i];
-      orbitRadius += ( child.treeSize() - 1 ) * child.size + this.size;
+      var orbit = this.getOrbit( child, date, orbitRadius );
 
       if( this.doShowPath ) {
         this.context.beginPath();
         this.context.ellipse(
-          this.position.x,
-          this.position.y,
-          orbitRadius,
-          orbitRadius * Math.cos(child.orbitalIncline),
+          orbit.center.x,
+          orbit.center.y,
+          orbit.majorAxis,
+          orbit.minorAxis,
+          -orbit.procession,
           minAngle,
           maxAngle,
           false);
@@ -93,25 +152,17 @@ export class OrbitalSystem {
         this.context.stroke();
       }
 
-      var angle = 2 * Math.PI * ( (date - child.offset) % child.orbit ) / child.orbit;
-
-      if( angle < 0 ){
-        angle = ( angle + 2 * Math.PI );
-      }
-
-      if( minAngle <= angle && angle < maxAngle ){        
-        child.position.x = this.position.x + orbitRadius * Math.cos(angle);
-        child.position.y = this.position.y + orbitRadius * Math.sin(angle) * Math.cos(child.orbitalIncline);
+      if( minAngle <= orbit.angle && orbit.angle < maxAngle ){        
+        child.position.x = orbit.position.x;
+        child.position.y = orbit.position.y;
         child.redrawSystem( date );
       }
 
-      orbitRadius += (child.treeSize() - 1) * child.size + this.size * Math.min(child.treeSize() - 1, 1);
+      orbitRadius = orbit.nextRadius;
     }
   }
 
   redrawSystem( date ) {
-    // TODO: Deal with elliptical orbits. See "eccentricity" and "procession" in Onid's data
-
     // Redraw "back" children
     this.redrawChildren( 0, Math.PI, date );
 
@@ -123,11 +174,13 @@ export class OrbitalSystem {
 
     // We're playing with negatives because the Y-axis in HTML is backward from the coordinate system
     this.rotationAngle = -1 * (Math.PI + 2 * Math.PI * ( (date - this.offset) % this.rotation ) / this.rotation );
+    
     if( this.showRotation && this.rotation ){
-      var startX = this.position.x + ( this.size + 5 )  * Math.cos(this.rotationAngle );
-      var endX   = this.position.x + ( this.size + 10 ) * Math.cos(this.rotationAngle );
-      var startY = this.position.y - ( this.size + 5 )  * Math.sin(this.rotationAngle ) * Math.cos( this.rotationalIncline );
-      var endY   = this.position.y - ( this.size + 10 ) * Math.sin(this.rotationAngle ) * Math.cos( this.rotationalIncline );
+      var angle = this.rotationAngle - this.currentProcession;
+      var startX = this.position.x + ( this.size + 5 )  * Math.cos( angle );
+      var endX   = this.position.x + ( this.size + 10 ) * Math.cos( angle );
+      var startY = this.position.y - ( this.size + 5 )  * Math.sin( angle ) * Math.cos( this.rotationalIncline );
+      var endY   = this.position.y - ( this.size + 10 ) * Math.sin( angle ) * Math.cos( this.rotationalIncline );
 
       this.context.beginPath();
       this.context.moveTo( startX, startY );

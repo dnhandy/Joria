@@ -109,7 +109,7 @@ function setup(){
   var canvas = document.getElementById( "solarSystemCanvas" );
   system = new OrbitalSystem( joria, canvas );
 
-  var canvasSize = system.size * ( system.treeSize() + 3 ) * 2;
+  var canvasSize = 2 * ( system.size + system.maxOrbitalDistance() );
   canvas.width = canvasSize;
   canvas.height = canvasSize;
   system.position.x = canvasSize / 2;
