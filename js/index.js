@@ -7,6 +7,10 @@ import joria from "../data/joria.json" assert {type: 'json'};
 var system = null;
 var calendar = null;
 
+let MAX_ZOOM = 5
+let MIN_ZOOM = 0.1
+let SCROLL_SENSITIVITY = 0.0005
+
 function play(){
   var playButton = document.getElementById("playButton");
   var pauseButton = document.getElementById("pauseButton");
@@ -109,11 +113,14 @@ function setup(){
   var canvas = document.getElementById( "solarSystemCanvas" );
   system = new OrbitalSystem( joria, canvas );
 
-  var canvasSize = 2 * ( system.size + system.maxOrbitalDistance() );
-  canvas.width = canvasSize;
-  canvas.height = canvasSize;
-  system.position.x = canvasSize / 2;
-  system.position.y = canvasSize / 2;
+  canvas.addEventListener( 'mousedown', onPointerDown );
+  canvas.addEventListener( 'touchstart', (e) => handleTouch(e, onPointerDown) );
+  canvas.addEventListener( 'mouseup', onPointerUp );
+  canvas.addEventListener( 'touchend',  (e) => handleTouch(e, onPointerUp) );
+  canvas.addEventListener( 'mousemove', onPointerMove );
+  canvas.addEventListener( 'touchmove', (e) => handleTouch(e, onPointerMove) );
+  canvas.addEventListener( 'wheel', (e) => adjustZoom( e.deltaY * SCROLL_SENSITIVITY) );
+  requestAnimationFrame( refresh );
 
   calendar = new FantasyCalendar( miiranCalendar );
   var monthInput = document.getElementById( "monthInput" );
@@ -123,7 +130,29 @@ function setup(){
     option.innerHTML = option.value;
     monthInput.appendChild( option );
   }
-  system.subscribe("Cator", updateHUD);
+
+  var hudSelect = document.getElementById( "hudSelect" );
+  addHudOptions( hudSelect, system );
+  hudSelect.addEventListener( "change", (e) => {
+    var planet = hudSelect.options[hudSelect.selectedIndex].value;
+    system.clearSubscriptions();
+    system.subscribe( planet, updateHUD );
+    refresh();
+  } );
+}
+
+function addHudOptions( select, orbitalSystem, includeSelf = false, indentation = "" ){
+  if( includeSelf ){
+    var option = document.createElement('option');
+    option.value = orbitalSystem.name;
+    option.innerHTML = indentation + orbitalSystem.name;
+    monthInput.appendChild( option );
+    select.appendChild( option );
+  }
+
+  for( var i = 0; i < orbitalSystem.children.length; i++ ){
+    addHudOptions( select, orbitalSystem.children[i], true, "&nbsp;&nbsp;" + indentation );
+  }
 }
 
 function showPathChanged(){
@@ -193,10 +222,106 @@ function updateHUD ( system ){
     ", hsl(" + topHue + ", " + topSaturation + "%, " + lightPercent +
     "%), hsl(" + bottomHue + ", " + bottomSaturation + "%, " + lightPercent + "%))";
 
-  document.getElementById("hud").style.background = background;
+  document.getElementById("skyColor").style.background = background;
+}
+
+// Gets the relevant location from a mouse or single touch event
+function getEventLocation(e)
+{
+    if (e.touches && e.touches.length == 1)
+    {
+        return { x:e.touches[0].clientX, y: e.touches[0].clientY }
+    }
+    else if (e.clientX && e.clientY)
+    {
+        return { x: e.clientX, y: e.clientY }        
+    }
 }
 
 window.onload = function(){
   setup();
   refresh();
+}
+
+let isDragging = false
+let dragStart = { x: 0, y: 0 }
+
+function onPointerDown(e)
+{
+    isDragging = true
+    dragStart.x = getEventLocation(e).x/system.cameraZoom - system.cameraOffset.x
+    dragStart.y = getEventLocation(e).y/system.cameraZoom - system.cameraOffset.y
+}
+
+function onPointerUp(e)
+{
+    isDragging = false
+    system.initialPinchDistance = null
+    system.lastZoom = system.cameraZoom
+}
+
+function onPointerMove(e)
+{
+    if (isDragging)
+    {
+        system.cameraOffset.x = getEventLocation(e).x/system.cameraZoom - dragStart.x
+        system.cameraOffset.y = getEventLocation(e).y/system.cameraZoom - dragStart.y
+        refresh()
+    }
+}
+
+function handleTouch(e, singleTouchHandler)
+{
+    if ( e.touches.length == 1 )
+    {
+        singleTouchHandler(e)
+    }
+    else if (e.type == "touchmove" && e.touches.length == 2)
+    {
+        isDragging = false
+        handlePinch(e)
+    }
+}
+
+function handlePinch(e)
+{
+    e.preventDefault()
+    
+    let touch1 = { x: e.touches[0].clientX, y: e.touches[0].clientY }
+    let touch2 = { x: e.touches[1].clientX, y: e.touches[1].clientY }
+    
+    // This is distance squared, but no need for an expensive sqrt as it's only used in ratio
+    let currentDistance = (touch1.x - touch2.x)**2 + (touch1.y - touch2.y)**2
+    
+    if (system.initialPinchDistance == null)
+    {
+        system.initialPinchDistance = currentDistance
+    }
+    else
+    {
+        adjustZoom( null, currentDistance/system.initialPinchDistance )
+    }
+    refresh();
+}
+
+function adjustZoom(zoomAmount, zoomFactor)
+{
+    if (!isDragging)
+    {
+        if (zoomAmount)
+        {
+            system.cameraZoom += zoomAmount
+        }
+        else if (zoomFactor)
+        {
+            console.log(zoomFactor)
+            system.cameraZoom = zoomFactor*system.lastZoom
+        }
+        
+        system.cameraZoom = Math.min( system.cameraZoom, MAX_ZOOM )
+        system.cameraZoom = Math.max( system.cameraZoom, MIN_ZOOM )
+        
+        console.log(zoomAmount)
+    }
+    refresh();
 }

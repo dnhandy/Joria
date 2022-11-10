@@ -1,9 +1,50 @@
 <html>
   <head>
+    <style>
+      html, body {
+          height: 100%;
+          margin: 0;
+          padding: 0px;
+          overflow: hidden;
+          background-color: #111;
+      }
 
+      #solarSystemCanvas {
+        width: 100%;
+        height: 100%;
+        background: #000000;
+      }
+
+      #orbitControl {
+        position:absolute;
+        border: 1px solid white;
+        color: white;
+        background-color: rgba(255, 255, 255, 0.1);
+        margin: 10px;
+        padding: 10px;
+      }
+
+      #hud {
+        position: absolute;
+        right: 0;
+        border: 1px solid white;
+        color: white;
+        background-color: rgba(255, 255, 255, 0.1);
+        margin: 10px;
+        padding: 10px;
+      }
+
+      #skyColor {
+        position: relative;
+        width: 200px;
+        height: 100px;
+      }
+
+    </style>
   </head>
-  <body style="background-color: black">
-    <div style="position:absolute; border: 1px solid white; color: white; background-color: rgba(255, 255, 255, 0.1); ">
+  <body>
+    <div id="orbitControl">
+      <h4>Orbit Control</h4>
       <div>
         <label for="date">Date: </label>
       </div>
@@ -47,11 +88,18 @@
         <input type = "radio" value="64" name="playSpeed" />
       </div>
     </div>
-    <div id="hud" style="position:absolute;right:50;width:200px;height:100px;">
+    <div id="hud">
+      <h4>Sky Monitor</h4>
+      <div>
+        <label for="hudSelect">Select a planet to monitor:</label>
+      </div>
+      <div>
+        <select name="hudSelect" id="hudSelect"></select>
+      </div>
+      
+      <div id="skyColor"></div>
     </div>
-    <div style="width:100%;height:100%;overflow:auto">
-      <canvas id="solarSystemCanvas" style="background-color:black;"></canvas>
-    </div>  
+    <canvas id="solarSystemCanvas"></canvas>
     <script src="js/index.js"  type="module"></script>
   </body>
 </html>

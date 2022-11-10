@@ -1,8 +1,13 @@
+
 export class OrbitalSystem {
   constructor(json, canvas, context = null, offset = 0){
     this.subscriptions = []
     this.canvas = canvas;
     this.context = context || canvas.getContext("2d");
+    this.cameraOffset = { x: window.innerWidth/2, y: window.innerHeight/2 }
+    this.cameraZoom = 0.1;
+    this.initialPinchDistance = null;
+    this.lastZoom = this.cameraZoom;
     
     this.name = json.name;
     this.color = json.color;
@@ -25,7 +30,7 @@ export class OrbitalSystem {
 
     this.doShowPath = true;
     this.doShowRotation = true;
-    this.position = { x: this.canvas.width / 2, y: this.canvas.height / 2 };
+    this.position = { x: 0 / 2, y: 0 };
 
     this.children = []
     if(json.children){
@@ -80,7 +85,7 @@ export class OrbitalSystem {
       var child = this.children[i];
       var orbit = this.getOrbit( child, child.offset + child.orbit / 2, nextRadius );
       nextRadius = orbit.nextRadius;
-      maxDistance = Math.max( maxDistance, orbit.radius + child.maxOrbitalDistance() );
+      maxDistance = Math.max( maxDistance, orbit.majorAxis + this.size + child.maxOrbitalDistance() );
     }
     return maxDistance;
   }
@@ -126,6 +131,11 @@ export class OrbitalSystem {
   }
 
   redraw( date ) {
+    this.canvas.width = window.innerWidth
+    this.canvas.height = window.innerHeight
+    this.context.translate( window.innerWidth / 2, window.innerHeight / 2 )
+    this.context.scale( this.cameraZoom, this.cameraZoom)
+    this.context.translate( -window.innerWidth / 2 + this.cameraOffset.x, -window.innerHeight / 2 + this.cameraOffset.y )
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     this.redrawSystem( date );
   }
@@ -206,6 +216,13 @@ export class OrbitalSystem {
 
     for( var i = 0; i < this.children.length; i++ ){
       this.children[i].subscribe( name, callback );
+    }
+  }
+
+  clearSubscriptions(){
+    this.subscriptions = [];
+    for( var i = 0; i < this.children.length; i++ ){
+      this.children[i].clearSubscriptions();
     }
   }
 }

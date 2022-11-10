@@ -9,9 +9,7 @@
       "size": 10,
       "color": "#AAAAAA",
       "orbit": 487.018,
-      "rotation": 487.018,
-      "eccentricity": 0.05,
-      "procession": 52890
+      "rotation": 487.018
     },
     {
       "name": "Lomar",
@@ -30,8 +28,7 @@
           "orbit": 21,
           "rotation": 21,
           "orbitalIncline": 85,
-          "rotationalIncline": 85,
-          "eccentricity": 0.18
+          "rotationalIncline": 85
         },
         {
           "name": "Tarsi",
@@ -40,8 +37,7 @@
           "orbit": 37,
           "rotation": 0.8,
           "orbitalIncline": 85,
-          "rotationalIncline": 85,
-          "eccentricity": 0.22
+          "rotationalIncline": 85
         }
       ]
     },
