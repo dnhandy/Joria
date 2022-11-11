@@ -100,6 +100,9 @@ export class OrbitalSystem {
       orbit.angle = ( orbit.angle + 2 * Math.PI );
     }
 
+    // Let's go backwards, since HTML coordinates go top-to-bottom
+    orbit.angle = 2 * Math.PI - orbit.angle;
+
     child.currentProcession = child.procession == 0 ? 0 : 2 * Math.PI * ( ( date - child.offset ) % child.procession ) / child.procession;
     orbit.procession = child.currentProcession;
     orbit.majorAxis =  baseRadius / ( 1 - child.eccentricity );
@@ -122,8 +125,8 @@ export class OrbitalSystem {
     
     // Now, add the procession in
     orbit.position = {
-      x: orbit.center.x + orbit.radius * Math.cos( tmpAngle - orbit.procession ),
-      y: orbit.center.y + orbit.radius * Math.sin( tmpAngle - orbit.procession )
+      x: orbit.center.x + orbit.radius * Math.cos( tmpAngle + orbit.procession ),
+      y: orbit.center.y + orbit.radius * Math.sin( tmpAngle + orbit.procession )
     }
 
     orbit.nextRadius = baseRadius + (child.treeSize() - 1) * child.size + this.size * Math.min(child.treeSize() - 1, 1);
@@ -153,7 +156,7 @@ export class OrbitalSystem {
           orbit.center.y,
           orbit.majorAxis,
           orbit.minorAxis,
-          -orbit.procession,
+          orbit.procession,
           minAngle,
           maxAngle,
           false);
@@ -182,11 +185,10 @@ export class OrbitalSystem {
     this.context.arc( this.position.x, this.position.y, this.size, 0, 2 * Math.PI, false );
     this.context.fill();
 
-    // We're playing with negatives because the Y-axis in HTML is backward from the coordinate system
-    this.rotationAngle = -1 * (Math.PI + 2 * Math.PI * ( (date - this.offset) % this.rotation ) / this.rotation );
+    this.rotationAngle = (Math.PI + 2 * Math.PI * ( (date - this.offset) % this.rotation ) / this.rotation );
     
     if( this.showRotation && this.rotation ){
-      var angle = this.rotationAngle - this.currentProcession;
+      var angle = this.rotationAngle + this.currentProcession;
       var startX = this.position.x + ( this.size + 5 )  * Math.cos( angle );
       var endX   = this.position.x + ( this.size + 10 ) * Math.cos( angle );
       var startY = this.position.y - ( this.size + 5 )  * Math.sin( angle ) * Math.cos( this.rotationalIncline );

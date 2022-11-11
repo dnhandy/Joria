@@ -135,7 +135,7 @@
       "orbit": 7358.4,
       "rotation": 7.2,
       "eccentricity": 0.3,
-      "procession": 0,
+      "procession": 60000,
       "children": [
         {
           "name": "Serin",

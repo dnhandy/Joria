@@ -167,22 +167,35 @@ function showRotationChanged(){
   refresh();
 }
 
-function updateHUD ( system ){
-  var xPos = system.position.x - system.origin.x;
+function updateHUD ( orbitalSystem ){
+  var xPos = orbitalSystem.position.x - system.position.x;
   // Transpose Y since HTML counts Y coordinates opposite of normal
-  var yPos = system.origin.y - system.position.y;
-  var orbitalMagnitude = Math.sqrt( Math.pow( xPos, 2 ) + Math.pow( yPos, 2 ) );
+  var yPos = orbitalSystem.position.y - system.position.y;
 
-  // Add a unit vector in the direction of rotation.
-  var rotationX = Math.cos( system.rotationAngle );
-  var rotationY = Math.sin( system.rotationAngle );
-  var summedVector = { x: xPos + rotationX, y: yPos + rotationY };
-  var summedVectorMagnitute = Math.sqrt( Math.pow( summedVector.x, 2 ) + Math.pow( summedVector.y, 2 ) );
+  var polarAngle = Math.atan( yPos / xPos );
+  if( xPos < 0 ){
+    polarAngle = polarAngle + Math.PI;
+  }
 
-  // Compare the summed vector's magnitude to a the what it would be if
-  // the orbital and rotational vectors were orthogonal. This will tell us whether they
-  // form an acute or obtuse angle, and therefore whether it's day. 
-  var rightAngleVectorMagnitude = Math.sqrt( Math.pow( orbitalMagnitude, 2 ) + 1 );
+  var rotationAngle = orbitalSystem.rotationAngle;
+  while( rotationAngle < 0 ) {
+    rotationAngle += 2 * Math.PI;
+  }
+
+  rotationAngle = 2 * Math.PI - rotationAngle;
+
+  var angleBetween = polarAngle - rotationAngle;
+
+  // Rotate around the circle till the number is positive
+  while( angleBetween < 0 ) {
+    angleBetween += 2 * Math.PI;
+  }
+  angleBetween = angleBetween % ( 2 * Math.PI );
+
+  // // pi/2 and 3pi/2 both represent the same "angle between"
+  // if ( angleBetween > Math.PI ) {
+  //   angleBetween = 2 * Math.PI - angleBetween;
+  // }
 
   var topHue = 180;
   var bottomHue = 180;
@@ -191,29 +204,16 @@ function updateHUD ( system ){
   var direction = "left";
   var lightPercent = 1;
 
-  if( summedVectorMagnitute < rightAngleVectorMagnitude ){
-    // It's an acute angle, so it's daylight!
-    
-    // The shortest resultant vector is if the two vectors are 180 degrees apart.
-    // This happens at noon.
-    var minMagnitude = orbitalMagnitude - 1;
-    var magnitudeVariability = rightAngleVectorMagnitude - minMagnitude;
-    var magnitudeRatio = ( rightAngleVectorMagnitude - summedVectorMagnitute ) / magnitudeVariability;
-    
-    // magnitudeRatio represents a linear "how far from noon is it?" function.
-    // Light doesn't raise and lower linearly, though. Put it through a sigmoid function first
+  if( angleBetween > Math.PI / 2 && angleBetween < 3 * Math.PI / 2) {
+    // It's daylight!
 
-    // How "steep" the sigmoid is
-    const gain = 20;
-    // Where the sigmoid function will be exactly 0.5
-    const offset = 0.1;
-    
-    // HSL gets ugly when light is above 50%
-    lightPercent = 50 * ( Math.tanh( gain * (magnitudeRatio - offset ) / 2 ) + 1 ) / 2;
+    lightPercent = 50 * Math.cos( angleBetween ) ** 2;
     if( lightPercent < 40 ){
-      topHue = 30;
-      topSaturation = 100 - lightPercent;
-      // TODO: determine whether this is sunrise or sunset, and change the direction accordingly
+      bottomHue = 30;
+      bottomSaturation = 100 - lightPercent;
+      if( rotationAngle < polarAngle ){
+        direction = "right";
+      }
     }
   }
 
